@@ -1,1 +1,56 @@
 @import "tailwindcss";
+
+body {
+  background-color: #1a1a1a;
+  color: white;
+}
+
+@keyframes glitch-shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 2px); }
+  50% { transform: translate(2px, -2px); }
+  75% { transform: translate(-2px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-player-fade {
+  animation: glitch-shake 0.3s infinite;
+  opacity: 0.5;
+  color: #ef4444;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes ghost-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 0.7; transform: scale(1.0); }
+}
+
+.animate-ai-fade {
+  animation: ghost-pulse 1.5s infinite ease-in-out;
+  color: #3b82f6; 
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+}
+
+@keyframes win-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+  50% { transform: scale(1.1); box-shadow: 0 0 20px rgba(34, 197, 94, 0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+.animate-win {
+  animation: win-pulse 1s infinite;
+  border-color: #22c55e !important; 
+  color: #22c55e !important;
+  z-index: 10; 
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: slide-up 0.5s ease-out forwards;
+}
