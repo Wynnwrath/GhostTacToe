@@ -1,6 +1,17 @@
-import Square from "./Square.jsx";
+import { useState, useEffect } from 'react';
+import Square from './Square'; 
+import { getBestAIMove } from './minimax';
 
 export default function GameContainer() {
+    // --- STATE ---
+
+    const [score, setScore] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('tic-tac-score');
+            return saved ? JSON.parse(saved) : { player: 0, ai: 0 };
+        }
+        return { player: 0, ai: 0 };
+    });
 
     const [aiMoves, setAiMoves] = useState([]);
     const [playerMoves, setPlayerMoves] = useState([]);
@@ -9,99 +20,128 @@ export default function GameContainer() {
     const [winner, setWinner] = useState(null);
 
     useEffect(() => {
+        localStorage.setItem('tic-tac-score', JSON.stringify(score));
+    }, [score]);
+    //Ai
+    useEffect(() => {
         if (isPlayerTurn || winner) return;
 
-        const aiMove = getBestAIMove(squares, aiMoves, playerMoves);
-
-        if (aiMove !== null) {
-            let newSquares = [...squares];
-            let newAiMoves = [...aiMoves];
-
-            if (newAiMoves.length >= 4) {
-                const moveToRemove = newAiMoves.shift(); 
-                newSquares[moveToRemove] = null;        
+        const timer = setTimeout(() => {
+            const aiMove = getBestAIMove(squares, aiMoves, playerMoves);
+            if (aiMove !== null) {
+                handleMove(aiMove, false); 
             }
+        }, 500);
 
-            newAiMoves.push(aiMove);
-            newSquares[aiMove] = 'O';
-            
-            setSquares(newSquares);
-            setAiMoves(newAiMoves);
-            setIsPlayerTurn(true); 
-            
-            checkWin(newSquares);
-        }
+        return () => clearTimeout(timer);
     }, [isPlayerTurn, winner]);
-    
+
+    const handleMove = (index, isPlayer) => {
+        let newSquares = [...squares];
+        let currentMoves = isPlayer ? [...playerMoves] : [...aiMoves];
+
+        if (currentMoves.length >= 3) {
+            const moveToRemove = currentMoves.shift();
+            newSquares[moveToRemove] = null;          
+        }
+
+        currentMoves.push(index);
+        newSquares[index] = isPlayer ? 'X' : 'O';
+
+        setSquares(newSquares);
+        if (isPlayer) {
+            setPlayerMoves(currentMoves);
+            setIsPlayerTurn(false);
+        } else {
+            setAiMoves(currentMoves);
+            setIsPlayerTurn(true);
+        }
+
+        checkWin(newSquares);
+    };
+
     const checkWin = (currentBoard) => {
         const lines = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], 
             [0, 3, 6], [1, 4, 7], [2, 5, 8], 
-            [0, 4, 8], [2, 4, 6]           
+            [0, 4, 8], [2, 4, 6]
         ];
 
-        for (let i = 0; i < lines.length; i++) {
-            const [a, b, c] = lines[i];
-            if (currentBoard[a] && 
-                currentBoard[a] === currentBoard[b] && 
-                currentBoard[a] === currentBoard[c]) {
-                setWinner(currentBoard[a]); 
+        for (let line of lines) {
+            const [a, b, c] = line;
+            if (currentBoard[a] && currentBoard[a] === currentBoard[b] && currentBoard[a] === currentBoard[c]) {
+                const gameWinner = currentBoard[a];
+                setWinner(gameWinner);
+                
+                setScore(prev => ({
+                    ...prev,
+                    [gameWinner === 'X' ? 'player' : 'ai']: prev[gameWinner === 'X' ? 'player' : 'ai'] + 1
+                }));
                 return;
             }
         }
     };
 
-    const handleClick = (index) => {
+    const handlePlayerClick = (index) => {
         if (squares[index] || winner || !isPlayerTurn) return;
+        handleMove(index, true); 
+    };
 
-        let newSquares = [...squares];
-        let newPlayerMoves = [...playerMoves];
-
-        if (newPlayerMoves.length >= 4) {
-            const moveToRemove = newPlayerMoves.shift();
-            newSquares[moveToRemove] = null;            
-        }
-
-        newPlayerMoves.push(index);
-        newSquares[index] = 'X';
-
-        setSquares(newSquares);
-        setPlayerMoves(newPlayerMoves);
-        setIsPlayerTurn(false); 
-
-        checkWin(newSquares);
+    const resetGame = () => {
+        setSquares(Array(9).fill(null));
+        setPlayerMoves([]);
+        setAiMoves([]);
+        setWinner(null);
+        setIsPlayerTurn(true); 
     };
 
     return (
-        <div className="flex flex-col items-center gap-4">
-            <h1 className="text-2xl font-bold">
-                {winner ? `Winner: ${winner}` : (isPlayerTurn ? "Your Turn" : "AI Thinking...")}
+        <div className="flex flex-col items-center gap-6 p-10 font-sans">
+            <div className="flex gap-10 text-xl font-bold">
+                <div className="text-blue-600">You: {score.player}
+                </div>
+                <div className="text-red-600">AI: {score.ai}</div>
+            </div>
+
+            <h1 className="text-3xl font-black h-10">
+                {winner ? (winner === 'X' ? "PLAYER WINS!" : "AI WINS!") : ""}
             </h1>
-            
-            <div className="grid grid-cols-3 gap-2">
+
+            <div className="grid grid-cols-3 gap-2 bg-gray-800 p-2 rounded-lg">
                 {squares.map((value, index) => {
                     const isFading = 
-                        (value === 'X' && playerMoves[0] === index && playerMoves.length === 4) ||
-                        (value === 'O' && aiMoves[0] === index && aiMoves.length === 4);
+                        (value === 'X' && playerMoves[0] === index && playerMoves.length === 3) ||
+                        (value === 'O' && aiMoves[0] === index && aiMoves.length === 3);
 
                     return (
                         <Square 
                             key={index} 
                             value={value} 
                             isFading={isFading}
-                            onClick={() => handleClick(index)} 
+                            onClick={() => handlePlayerClick(index)} 
                         />
                     );
                 })}
             </div>
+
             {winner && (
                 <button 
-                    className="p-2 bg-blue-500 text-white rounded"
-                    onClick={() => window.location.reload()}
+                    onClick={resetGame}
+                    className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 transition"
                 >
-                    Restart
+                    Play Again
                 </button>
             )}
+            
+             <button 
+                onClick={() => {
+                    localStorage.removeItem('tic-tac-score');
+                    setScore({player: 0, ai: 0});
+                }}
+                className="text-xs text-gray-400 mt-4 underline"
+            >
+                Reset Score
+            </button>
         </div>
     );
 }
