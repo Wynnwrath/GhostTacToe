@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaCog, FaTimes, FaHome, FaRedo } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaCog, FaTimes, FaHome, FaRedo, FaHistory } from 'react-icons/fa';
 import Square from '../components/Square'; 
 import ClickSpark from '../animation/ClickSpark';
 import { getBestAIMove } from '../components/minimax';
@@ -12,6 +12,15 @@ export default function GamePage({ difficulty, onGoHome }) {
         }
         return { player: 0, ai: 0 };
     });
+
+    const [history, setHistory] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('tic-tac-history');
+            return saved ? JSON.parse(saved) : [];
+        }
+        return [];
+    });
+
     const [aiMoves, setAiMoves] = useState([]);
     const [playerMoves, setPlayerMoves] = useState([]);
     const [squares, setSquares] = useState(Array(9).fill(null));
@@ -20,10 +29,16 @@ export default function GamePage({ difficulty, onGoHome }) {
     const [winningLine, setWinningLine] = useState([]); 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    // --- EFFECTS ---
+    const historyEndRef = useRef(null);
+
     useEffect(() => {
         localStorage.setItem('tic-tac-score', JSON.stringify(score));
     }, [score]);
+
+    useEffect(() => {
+        localStorage.setItem('tic-tac-history', JSON.stringify(history));
+        historyEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [history]);
 
     useEffect(() => {
         if (isPlayerTurn || winner) return;
@@ -36,7 +51,6 @@ export default function GamePage({ difficulty, onGoHome }) {
         return () => clearTimeout(timer);
     }, [isPlayerTurn, winner]);
 
-    // --- LOGIC ---
     const handleMove = (index, isPlayer) => {
         let newSquares = [...squares];
         let currentMoves = isPlayer ? [...playerMoves] : [...aiMoves];
@@ -69,13 +83,26 @@ export default function GamePage({ difficulty, onGoHome }) {
                 const gameWinner = currentBoard[a];
                 setWinner(gameWinner);
                 setWinningLine(line); 
+                
                 setScore(prev => ({
                     ...prev,
                     [gameWinner === 'X' ? 'player' : 'ai']: prev[gameWinner === 'X' ? 'player' : 'ai'] + 1
                 }));
+
+                addToHistory(gameWinner);
                 return;
             }
         }
+    };
+
+    const addToHistory = (winnerSymbol) => {
+        const newEntry = {
+            id: Date.now(),
+            winner: winnerSymbol === 'X' ? 'PLAYER' : 'AI',
+            difficulty: difficulty,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        setHistory(prev => [...prev.slice(-9), newEntry]);
     };
 
     const resetGame = () => {
@@ -87,11 +114,17 @@ export default function GamePage({ difficulty, onGoHome }) {
         setIsPlayerTurn(winner === 'O'); 
     };
 
+    const clearHistory = () => {
+        setHistory([]);
+        setScore({player: 0, ai: 0}); 
+        localStorage.removeItem('tic-tac-score');
+        localStorage.removeItem('tic-tac-history');
+    };
+
     // --- RENDER ---
     return (
-        <div className="relative z-10 flex flex-col items-center justify-start pt-10 gap-6 animate-in fade-in zoom-in duration-500">
-            
-            {/* SETTINGS BUTTON */}
+        <div className="relative z-10 flex flex-col items-center justify-start pt-8 pb-8 gap-4 animate-in fade-in zoom-in duration-500 h-screen overflow-y-auto custom-scrollbar">
+
             <button 
                 onClick={() => setIsSettingsOpen(true)}
                 className="absolute top-6 right-6 p-3 bg-gray-800 rounded-full text-gray-400 hover:text-white hover:rotate-90 transition-all shadow-lg z-50"
@@ -99,7 +132,6 @@ export default function GamePage({ difficulty, onGoHome }) {
                 <FaCog size={24} />
             </button>
 
-            {/* SETTINGS MODAL */}
             {isSettingsOpen && (
                 <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center">
                     <div className="bg-gray-900 p-8 rounded-2xl border border-gray-700 shadow-2xl w-80 flex flex-col gap-6">
@@ -111,6 +143,9 @@ export default function GamePage({ difficulty, onGoHome }) {
                             <button onClick={() => { resetGame(); setIsSettingsOpen(false); }} className="flex items-center justify-center gap-2 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-white font-bold transition">
                                 <FaRedo /> Restart Game
                             </button>
+                            <button onClick={clearHistory} className="flex items-center justify-center gap-2 py-3 bg-gray-800 hover:bg-red-900/30 text-red-400 hover:text-red-300 rounded-lg font-bold transition">
+                                <FaHistory /> Clear History
+                            </button>
                             <button onClick={onGoHome} className="flex items-center justify-center gap-2 py-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg font-bold transition">
                                 <FaHome /> Main Menu
                             </button>
@@ -119,12 +154,10 @@ export default function GamePage({ difficulty, onGoHome }) {
                 </div>
             )}
 
-            {/* HEADER */}
             <h1 className="text-4xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg select-none">
                 GHOST TAC TOE
             </h1>
 
-            {/* SCORE */}
             <div className="flex gap-12 text-xl font-bold tracking-wider select-none">
                 <div className="flex flex-col items-center">
                     <span className="text-gray-400 text-xs tracking-widest">YOU</span>
@@ -136,7 +169,6 @@ export default function GamePage({ difficulty, onGoHome }) {
                 </div>
             </div>
 
-            {/* STATUS */}
             <div className="h-8 flex items-center justify-center select-none">
                 {winner ? (
                     <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
@@ -149,7 +181,6 @@ export default function GamePage({ difficulty, onGoHome }) {
                 )}
             </div>
 
-            {/* BOARD */}
             <ClickSpark sparkColor='#22d3ee' sparkSize={10} sparkRadius={20} sparkCount={8} duration={400}>
                 <div className="grid grid-cols-3 gap-3 w-fit mx-auto bg-gray-800/80 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-gray-700 relative">
                     {squares.map((value, index) => {
@@ -171,8 +202,7 @@ export default function GamePage({ difficulty, onGoHome }) {
                 </div>
             </ClickSpark>
 
-            {/* RESTART BUTTON */}
-            <div className="h-14 flex flex-col items-center gap-2">
+            <div className="h-10 flex flex-col items-center justify-center">
                 {winner && (
                     <button 
                         onClick={resetGame}
@@ -182,6 +212,30 @@ export default function GamePage({ difficulty, onGoHome }) {
                     </button>
                 )}
             </div>
+
+            <div className="w-full max-w-xs mt-2 p-4 bg-gray-900/50 backdrop-blur-md rounded-xl border border-gray-800">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">Match History</h3>
+                
+                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
+                    {history.length === 0 ? (
+                        <p className="text-center text-gray-600 text-xs italic">No matches played yet.</p>
+                    ) : (
+                        history.map((match) => (
+                            <div key={match.id} className="flex justify-between items-center text-xs p-2 bg-gray-800/50 rounded hover:bg-gray-800 transition">
+                                <span className="text-gray-500 font-mono">{match.timestamp}</span>
+                                <span className={`font-bold ${match.winner === 'PLAYER' ? 'text-cyan-400' : 'text-pink-500'}`}>
+                                    {match.winner === 'PLAYER' ? 'YOU WON' : 'AI WON'}
+                                </span>
+                                <span className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300">
+                                    {match.difficulty}
+                                </span>
+                            </div>
+                        ))
+                    )}
+                    <div ref={historyEndRef} />
+                </div>
+            </div>
+
         </div>
     );
 }
