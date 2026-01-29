@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'; // Import useMemo just in case, but we will use constants
+import { useState, useEffect } from 'react';
 import Square from './Square'; 
 import { getBestAIMove } from './minimax'; 
 import ClickSpark from '../animation/ClickSpark';
@@ -53,7 +53,7 @@ export default function GameContainer() {
         let currentMoves = isPlayer ? [...playerMoves] : [...aiMoves];
 
         if (currentMoves.length >= 3) {
-            const moveToRemove = currentMoves.shift(); 
+            const moveToRemove = currentMoves.shift();
             newSquares[moveToRemove] = null;          
         }
 
@@ -101,25 +101,30 @@ export default function GameContainer() {
     };
 
     const resetGame = () => {
+        const nextStartIsPlayer = winner === 'O';
+
         setSquares(Array(9).fill(null));
         setPlayerMoves([]);
         setAiMoves([]);
         setWinner(null);
         setWinningLine([]); 
-        setIsPlayerTurn(true); 
+        
+        setIsPlayerTurn(nextStartIsPlayer); 
     };
 
     return (
         <div className="relative min-h-screen bg-gray-900 font-sans overflow-hidden">            
+
             <div className="fixed inset-0 z-0 opacity-40 pointer-events-auto">
                 <Dither
-                waveColor={WAVE_COLOR}
-                {...DITHER_CONFIG}     
-            />
+                    waveColor={WAVE_COLOR} 
+                    {...DITHER_CONFIG}     
+                />
             </div>
 
             <div className="relative z-10 flex flex-col items-center justify-start pt-10 gap-6">
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg select-none">
+                
+                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg select-none">
                     Ghost Tac Toe
                 </h1>
 
@@ -136,18 +141,9 @@ export default function GameContainer() {
 
                 <div className="h-8 flex items-center justify-center select-none">
                     {winner ? (
-                        // <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
-                        //     {winner === 'X' ? "VICTORY!" : "DEFEAT"}
-                        // </h2>
-                        <h2 
-                    className={`text-5xl font-black animate-bounce ${
-                        winner === 'X' 
-                        ? "text-green-500 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" 
-                        : "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"
-                    }`}
-                    >
-                    {winner === 'X' ? "VICTORY!" : "DEFEAT"}
-                    </h2>
+                        <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
+                            {winner === 'X' ? "VICTORY!" : "DEFEAT"}
+                        </h2>
                     ) : (
                         <p className="text-gray-400 animate-pulse font-mono text-sm bg-gray-900/60 px-4 py-1 rounded backdrop-blur-md">
                             {isPlayerTurn ? "[ YOUR TURN ]" : "[ AI COMPUTING... ]"}
