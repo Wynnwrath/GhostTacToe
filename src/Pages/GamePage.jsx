@@ -171,7 +171,16 @@ export default function GamePage({ difficulty, onGoHome }) {
 
             <div className="h-8 flex items-center justify-center select-none">
                 {winner ? (
-                    <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
+                    // <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
+                    //     {winner === 'X' ? "VICTORY!" : "DEFEAT"}
+                    // </h2>
+                    <h2 
+                        className={`text-3xl font-black animate-bounce ${
+                            winner === 'X' 
+                            ? "text-green-500 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" 
+                            : "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"
+                        }`}
+                        >
                         {winner === 'X' ? "VICTORY!" : "DEFEAT"}
                     </h2>
                 ) : (
