@@ -30,7 +30,7 @@ export default function GameContainer() {
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const [winner, setWinner] = useState(null);
     const [winningLine, setWinningLine] = useState([]); 
-
+    const [difficulty, setDifficulty] = useState('Normal'); 
     useEffect(() => {
         localStorage.setItem('tic-tac-score', JSON.stringify(score));
     }, [score]);
@@ -39,12 +39,12 @@ export default function GameContainer() {
         if (isPlayerTurn || winner) return;
 
         const timer = setTimeout(() => {
-            const aiMove = getBestAIMove(squares, aiMoves, playerMoves);
+            const aiMove = getBestAIMove(squares, aiMoves, playerMoves, difficulty);
             if (aiMove !== null) {
                 handleMove(aiMove, false); 
             }
         }, 500);
-
+        
         return () => clearTimeout(timer);
     }, [isPlayerTurn, winner]);
 
@@ -124,10 +124,31 @@ export default function GameContainer() {
 
             <div className="relative z-10 flex flex-col items-center justify-start pt-10 gap-6">
                 
-                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg select-none">
+                <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent drop-shadow-lg select-none">
                     Ghost Tac Toe
                 </h1>
 
+                {/* DIFFICULTY SELECTOR */}
+                <div className="flex gap-4 mb-4 select-none z-20">
+                    {['Easy', 'Normal', 'Hard'].map((level) => (
+                        <button
+                            key={level}
+                            onClick={() => {
+                                setDifficulty(level);
+                                resetGame(); 
+                            }}
+                            className={`
+                                px-4 py-1 rounded-full text-xs font-bold tracking-widest transition-all
+                                ${difficulty === level 
+                                    ? 'bg-white text-black scale-110 shadow-[0_0_15px_rgba(255,255,255,0.5)]' 
+                                    : 'bg-gray-800 text-gray-500 hover:text-white hover:bg-gray-700'}
+                            `}
+                        >
+                            {level.toUpperCase()}
+                        </button>
+                    ))}
+                </div>
+                
                 <div className="flex gap-12 text-xl font-bold tracking-wider select-none">
                     <div className="flex flex-col items-center">
                         <span className="text-gray-400 text-xs tracking-widest">YOU</span>
