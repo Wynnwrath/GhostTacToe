@@ -15,7 +15,7 @@ export default function MenuPage({ onStartGame }) {
             <div className="flex flex-col gap-4 items-center animate-fade-in-up">
                 <p className="text-gray-400 tracking-widest text-sm uppercase">Select Difficulty</p>
                 <div className="flex flex-wrap justify-center gap-6">
-                    {['Easy', 'Normal', 'Hard'].map((diff) => (
+                    {['Easy', 'Normal', 'Hard', 'Impossible'].map((diff) => (
                         <button
                             key={diff}
                             onClick={() => onStartGame(diff)}
