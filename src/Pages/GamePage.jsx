@@ -21,16 +21,17 @@ export default function GamePage({ difficulty, onGoHome }) {
         return [];
     });
 
-    const [aiMoves, setAiMoves] = useState([]);
-    const [playerMoves, setPlayerMoves] = useState([]);
+    const [aiMoves, setAiMoves] = useState([]);     // Also acts as Player 2 moves in PvP
+    const [playerMoves, setPlayerMoves] = useState([]); // Acts as Player 1 moves
     const [squares, setSquares] = useState(Array(9).fill(null));
-    const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+    const [isPlayerTurn, setIsPlayerTurn] = useState(true); // True = P1/User, False = P2/AI
     const [winner, setWinner] = useState(null);
     const [winningLine, setWinningLine] = useState([]); 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const historyEndRef = useRef(null);
 
+    // --- EFFECTS ---
     useEffect(() => {
         localStorage.setItem('tic-tac-score', JSON.stringify(score));
     }, [score]);
@@ -40,7 +41,9 @@ export default function GamePage({ difficulty, onGoHome }) {
         historyEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [history]);
 
+    // AI LOGIC 
     useEffect(() => {
+        if (difficulty === 'PvP') return; 
         if (isPlayerTurn || winner) return;
 
         const timer = setTimeout(() => {
@@ -49,7 +52,7 @@ export default function GamePage({ difficulty, onGoHome }) {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [isPlayerTurn, winner]);
+    }, [isPlayerTurn, winner, difficulty]);
 
     const handleMove = (index, isPlayer) => {
         let newSquares = [...squares];
@@ -75,6 +78,18 @@ export default function GamePage({ difficulty, onGoHome }) {
         checkWin(newSquares);
     };
 
+    const handlePlayerClick = (index) => {
+        if (squares[index] || winner) return;
+
+        if (difficulty === 'PvP') {
+            handleMove(index, isPlayerTurn);
+        } else {
+            if (isPlayerTurn) {
+                handleMove(index, true);
+            }
+        }
+    };
+
     const checkWin = (currentBoard) => {
         const lines = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
         for (let line of lines) {
@@ -96,9 +111,16 @@ export default function GamePage({ difficulty, onGoHome }) {
     };
 
     const addToHistory = (winnerSymbol) => {
+        let winnerName;
+        if (difficulty === 'PvP') {
+            winnerName = winnerSymbol === 'X' ? 'P1' : 'P2';
+        } else {
+            winnerName = winnerSymbol === 'X' ? 'YOU' : 'AI';
+        }
+
         const newEntry = {
             id: Date.now(),
-            winner: winnerSymbol === 'X' ? 'PLAYER' : 'AI',
+            winner: winnerName, 
             difficulty: difficulty,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
@@ -111,6 +133,7 @@ export default function GamePage({ difficulty, onGoHome }) {
         setAiMoves([]);
         setWinner(null);
         setWinningLine([]); 
+
         setIsPlayerTurn(winner === 'O'); 
     };
 
@@ -121,7 +144,6 @@ export default function GamePage({ difficulty, onGoHome }) {
         localStorage.removeItem('tic-tac-history');
     };
 
-    // --- RENDER ---
     return (
         <div className="relative z-10 flex flex-col items-center justify-start pt-8 pb-8 gap-4 animate-in fade-in zoom-in duration-500 h-screen overflow-y-auto custom-scrollbar">
 
@@ -159,38 +181,43 @@ export default function GamePage({ difficulty, onGoHome }) {
             </h1>
 
             <div className="flex gap-12 text-xl font-bold tracking-wider select-none">
-                <div className="flex flex-col items-center">
-                    <span className="text-gray-400 text-xs tracking-widest">YOU</span>
+                <div className={`flex flex-col items-center transition-opacity ${!isPlayerTurn ? 'opacity-50' : 'opacity-100'}`}>
+                    <span className="text-gray-400 text-xs tracking-widest">
+                        {difficulty === 'PvP' ? 'PLAYER 1' : 'YOU'}
+                    </span>
                     <span className="text-cyan-400 text-2xl">{score.player}</span>
                 </div>
-                <div className="flex flex-col items-center">
-                    <span className="text-gray-400 text-xs tracking-widest">AI ({difficulty})</span>
+                <div className={`flex flex-col items-center transition-opacity ${isPlayerTurn ? 'opacity-50' : 'opacity-100'}`}>
+                    <span className="text-gray-400 text-xs tracking-widest">
+                        {difficulty === 'PvP' ? 'PLAYER 2' : `AI (${difficulty})`}
+                    </span>
                     <span className="text-pink-500 text-2xl">{score.ai}</span>
                 </div>
             </div>
 
             <div className="h-8 flex items-center justify-center select-none">
                 {winner ? (
-                    // <h2 className="text-3xl font-black text-green-400 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)] animate-bounce">
-                    //     {winner === 'X' ? "VICTORY!" : "DEFEAT"}
-                    // </h2>
-                    <h2 
-                        className={`text-3xl font-black animate-bounce ${
+                    <h2 className={`text-3xl font-black animate-bounce ${
                             winner === 'X' 
                             ? "text-green-500 drop-shadow-[0_0_10px_rgba(74,222,128,0.5)]" 
                             : "text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]"
                         }`}
-                        >
-                        {winner === 'X' ? "VICTORY!" : "DEFEAT"}
+                    >
+                        {winner === 'X' 
+                             ? (difficulty === 'PvP' ? "PLAYER 1 WINS!" : "VICTORY!") 
+                             : (difficulty === 'PvP' ? "PLAYER 2 WINS!" : "DEFEAT")}
                     </h2>
                 ) : (
                     <p className="text-gray-400 animate-pulse font-mono text-sm bg-gray-900/60 px-4 py-1 rounded backdrop-blur-md">
-                        {isPlayerTurn ? "[ YOUR TURN ]" : "[ AI COMPUTING... ]"}
+                        {difficulty === 'PvP' 
+                            ? (isPlayerTurn ? "[ PLAYER 1 TURN ]" : "[ PLAYER 2 TURN ]")
+                            : (isPlayerTurn ? "[ YOUR TURN ]" : "[ AI COMPUTING... ]")
+                        }
                     </p>
                 )}
             </div>
 
-            <ClickSpark sparkColor='#22d3ee' sparkSize={10} sparkRadius={20} sparkCount={8} duration={400}>
+            <ClickSpark sparkColor={isPlayerTurn ? '#22d3ee' : '#ec4899'} sparkSize={10} sparkRadius={20} sparkCount={8} duration={400}>
                 <div className="grid grid-cols-3 gap-3 w-fit mx-auto bg-gray-800/80 backdrop-blur-sm p-3 rounded-2xl shadow-2xl border border-gray-700 relative">
                     {squares.map((value, index) => {
                         const isFading = 
@@ -204,7 +231,7 @@ export default function GamePage({ difficulty, onGoHome }) {
                                 isFading={isFading}
                                 isWinning={winningLine.includes(index)} 
                                 isPlayerPiece={value === 'X'}
-                                onClick={() => !squares[index] && !winner && isPlayerTurn && handleMove(index, true)} 
+                                onClick={() => handlePlayerClick(index)} 
                             />
                         );
                     })}
@@ -232,8 +259,15 @@ export default function GamePage({ difficulty, onGoHome }) {
                         history.map((match) => (
                             <div key={match.id} className="flex justify-between items-center text-xs p-2 bg-gray-800/50 rounded hover:bg-gray-800 transition">
                                 <span className="text-gray-500 font-mono">{match.timestamp}</span>
-                                <span className={`font-bold ${match.winner === 'PLAYER' ? 'text-cyan-400' : 'text-pink-500'}`}>
-                                    {match.winner === 'PLAYER' ? 'YOU WON' : 'AI WON'}
+                                <span className={`font-bold ${
+                                    match.winner === 'YOU' || match.winner === 'P1' 
+                                    ? 'text-cyan-400' 
+                                    : 'text-pink-500'
+                                }`}>
+                                    {match.winner === 'YOU' ? 'YOU WON' 
+                                     : match.winner === 'AI' ? 'AI WON'
+                                     : match.winner === 'P1' ? 'P1 WON'
+                                     : 'P2 WON'}
                                 </span>
                                 <span className="text-[10px] bg-gray-700 px-1.5 py-0.5 rounded text-gray-300">
                                     {match.difficulty}
