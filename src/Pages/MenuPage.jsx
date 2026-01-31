@@ -11,7 +11,7 @@ export default function MenuPage({ onStartGame }) {
                 />
             </div>
 
-            <div className="flex flex-col gap-6 items-center animate-fade-in-up" style={{animationDelay: '1s'}}>
+            <div className="flex flex-col gap-6 items-center animate-fade-in-up">
 
                 <button
                     onClick={() => onStartGame('PvP')}
