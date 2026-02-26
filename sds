@@ -1,0 +1,37 @@
+import {Text, View, TextInput, FlatList} from "react-native"
+import {useState} from "react"
+export default function AssetExample() {
+  const [search, setSearch] = useState("");
+
+  const text = [
+    "ALPHA","BRAVO","CHARLIE","DELTA","ECHO","FOXTROT",
+    "GOLF","HOTEL","INDIA","JULIET","KILO","LIMA",
+    "MIKE","NOVEMBER","OSCAR","PAPA","QUEBEC",
+    "ROMEO","SIERRA","TANGO","UNIFORM","VICTOR",
+    "WHISKEY","YANKEE","ZULU"
+  ];
+
+  const filteredData = text.filter(item =>
+    item.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <View>
+      <Text>John Paul Singco</Text>
+
+      <TextInput
+        placeholder="Search..."
+        value={search}
+        onChangeText={setSearch}
+      />
+
+      <FlatList
+        data={filteredData}
+        renderItem={({ item }) => (
+          <Text>{item}</Text>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    </View>
+  );
+}
