@@ -1,8 +1,7 @@
 # Dependencies
 client/node_modules/
-server/__pycache__/
-server/app/__pycache__/
-server/app/**/__pycache__/
+server/node_modules/
+__pycache__/
 *.pyc
 
 # Build
