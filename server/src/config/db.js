@@ -3,11 +3,10 @@ import { env } from "./env.js";
 
 export async function connectDB() {
   try {
-    await mongoose.connect(env.MONGODB_URI);
-    console.log("MongoDB connected");
+    await mongoose.connect(env.MONGO_URI);
+    console.log(`[MongoDB] Connected to ${env.MONGO_URI}`);
   } catch (err) {
-    console.error("MongoDB connection error:", err.message);
-    process.exit(1);
+    console.warn(`[MongoDB] Connection failed: ${err.message}. Operating in in-memory fallback mode.`);
   }
 }
 

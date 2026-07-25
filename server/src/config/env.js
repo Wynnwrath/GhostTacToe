@@ -2,7 +2,8 @@ import dotenv from "dotenv";
 dotenv.config({ path: "../.env", override: true });
 
 function getMongoUri() {
-  return process.env.MONGODB_URI
+  return process.env.MONGO_URI
+    || process.env.MONGODB_URI
     || process.env.MONGODB_URL
     || process.env.MONGO_URL
     || "mongodb://mongo:27017/ghosttactoe";
@@ -10,7 +11,7 @@ function getMongoUri() {
 
 export const env = {
   PORT: process.env.PORT || 8000,
-  MONGODB_URI: getMongoUri(),
+  MONGO_URI: getMongoUri(),
   JWT_SECRET: process.env.JWT_SECRET || "change-me-in-production-use-a-64-char-random-string",
   JWT_EXPIRE: process.env.JWT_EXPIRE || "24h",
   CLIENT_URL: process.env.CLIENT_URL || "http://localhost:5173",

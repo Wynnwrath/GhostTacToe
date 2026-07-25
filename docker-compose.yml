@@ -1,27 +1,28 @@
 version: "3.8"
 
 services:
+  mongo:
+    image: mongo:latest
+    container_name: ghosttactoe-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
   server:
     build: .
+    container_name: ghosttactoe-server
+    environment:
+      - PORT=8000
+      - MONGO_URI=mongodb://mongo:27017/ghosttactoe
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-change-in-production}
+      - NODE_ENV=production
     ports:
       - "8000:8000"
     depends_on:
       - mongo
     restart: always
-    env_file:
-      - .env
-    environment:
-      MONGODB_URI: mongodb://mongo:27017/ghosttactoe
-      JWT_SECRET: ${JWT_SECRET}
-      NODE_ENV: production
-
-  mongo:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    restart: always
-    volumes:
-      - mongo-data:/data/db
 
 volumes:
   mongo-data:

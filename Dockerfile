@@ -1,25 +1,23 @@
-# Stage 1: Build client
-FROM node:22-alpine AS build
+FROM node:18-alpine as build-stage
 
 WORKDIR /app
 
 COPY client/package.json client/package-lock.json ./client/
-RUN cd client && npm install
+RUN cd client && npm install --include=dev
 
 COPY client/ ./client/
 RUN cd client && npm run build
 
-# Stage 2: Production server
-FROM node:22-alpine
+FROM node:18-alpine as production-stage
 
 WORKDIR /app
 
 COPY server/package.json server/package-lock.json ./server/
-RUN cd server && npm install --production
+RUN cd server && npm install --omit=dev
 
 COPY server/ ./server/
 
-COPY --from=build /app/client/dist ./client/dist
+COPY --from=build-stage /app/client/dist ./client/dist
 
 EXPOSE 8000
 
