@@ -1,10 +1,11 @@
 [phases.setup]
-aptPkgs = ['python3', 'python3-pip', 'python3-venv']
+aptPkgs = ['python3', 'python3-pip', 'python3-venv', 'python3-full']
 nixPkgs = ['...']
 
 [phases.install]
 cmds = [
-    'pip3 install -r server/requirements.txt',
+    'python3 -m venv /opt/venv',
+    '/opt/venv/bin/pip install -r server/requirements.txt',
     'npm install --prefix client'
 ]
 
@@ -12,4 +13,4 @@ cmds = [
 cmds = ['npm run build --prefix client']
 
 [start]
-cmd = 'cd server && python3 -m uvicorn main:socket_app --host 0.0.0.0 --port ${PORT:-8000}'
+cmd = 'cd server && /opt/venv/bin/python -m uvicorn main:socket_app --host 0.0.0.0 --port ${PORT:-8000}'
