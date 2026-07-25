@@ -1,11 +1,11 @@
-providers = ['node', 'python']
+providers = ['python', 'node']
 
 [phases.setup]
-nixPkgs = ['python3', 'python3Packages.pip', 'nodejs']
+nixPkgs = ['nodejs']
 
 [phases.install]
 cmds = [
-    'python3 -m venv /opt/venv',
+    'python -m venv /opt/venv',
     '/opt/venv/bin/pip install --upgrade pip',
     '/opt/venv/bin/pip install -r server/requirements.txt',
     'npm install --prefix client'
@@ -19,4 +19,5 @@ cmd = 'cd server && /opt/venv/bin/python -m uvicorn main:socket_app --host 0.0.0
 
 [variables]
 PATH = '/opt/venv/bin:$PATH'
+
 
