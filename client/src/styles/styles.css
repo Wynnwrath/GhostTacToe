@@ -1,0 +1,91 @@
+[data-theme="dark"] {
+  --color-surface: #0a0a0f;
+  --color-surface-elevated: #14141f;
+  --color-text-primary: #f1f1f7;
+  --color-text-secondary: #9494a6;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-accent-cyan: #22d3ee;
+  --color-accent-pink: #ec4899;
+  --color-accent-green: #22c55e;
+  --color-accent-red: #ef4444;
+
+  --glass-subtle-bg: rgba(255, 255, 255, 0.03);
+  --glass-medium-bg: rgba(255, 255, 255, 0.06);
+  --glass-bold-bg: rgba(255, 255, 255, 0.10);
+  --glass-subtle-blur: 4px;
+  --glass-medium-blur: 8px;
+  --glass-bold-blur: 16px;
+  --glass-subtle-border: rgba(255, 255, 255, 0.05);
+  --glass-medium-border: rgba(255, 255, 255, 0.08);
+  --glass-bold-border: rgba(255, 255, 255, 0.12);
+
+  --font-family-body: "Inter", system-ui, sans-serif;
+  --font-family-heading: "Inter", system-ui, sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+}
+
+[data-theme="light"] {
+  --color-surface: #fafafa;
+  --color-surface-elevated: #ffffff;
+  --color-text-primary: #0a0a0f;
+  --color-text-secondary: #64647a;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-accent-cyan: #0891b2;
+  --color-accent-pink: #db2777;
+  --color-accent-green: #16a34a;
+  --color-accent-red: #dc2626;
+
+  --glass-subtle-bg: rgba(0, 0, 0, 0.03);
+  --glass-medium-bg: rgba(0, 0, 0, 0.06);
+  --glass-bold-bg: rgba(0, 0, 0, 0.10);
+  --glass-subtle-blur: 4px;
+  --glass-medium-blur: 8px;
+  --glass-bold-blur: 16px;
+  --glass-subtle-border: rgba(0, 0, 0, 0.05);
+  --glass-medium-border: rgba(0, 0, 0, 0.08);
+  --glass-bold-border: rgba(0, 0, 0, 0.12);
+
+  --font-family-body: "Inter", system-ui, sans-serif;
+  --font-family-heading: "Inter", system-ui, sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+}
+
+html {
+  font-family: var(--font-family-body);
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+}
+
+.glass-subtle {
+  background: var(--glass-subtle-bg);
+  backdrop-filter: blur(var(--glass-subtle-blur));
+  -webkit-backdrop-filter: blur(var(--glass-subtle-blur));
+  border: 1px solid var(--glass-subtle-border);
+}
+
+.glass-medium {
+  background: var(--glass-medium-bg);
+  backdrop-filter: blur(var(--glass-medium-blur));
+  -webkit-backdrop-filter: blur(var(--glass-medium-blur));
+  border: 1px solid var(--glass-medium-border);
+}
+
+.glass-bold {
+  background: var(--glass-bold-bg);
+  backdrop-filter: blur(var(--glass-bold-blur));
+  -webkit-backdrop-filter: blur(var(--glass-bold-blur));
+  border: 1px solid var(--glass-bold-border);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
