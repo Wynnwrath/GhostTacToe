@@ -5,7 +5,7 @@ function getMongoUri() {
   return process.env.MONGODB_URI
     || process.env.MONGODB_URL
     || process.env.MONGO_URL
-    || "mongodb://localhost:27017/ghosttactoe";
+    || "mongodb://mongo:27017/ghosttactoe";
 }
 
 export const env = {
